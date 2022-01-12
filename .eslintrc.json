@@ -1,0 +1,15 @@
+{
+  "extends": "airbnb-base",
+  "rules": {
+    "no-console": "off",
+    "no-underscore-dangle": ["error", { "allow": ["_id"]}],
+    "no-unused-vars": [2, { "args": "none" }],
+    "arrow-body-style": "off",
+    "max-len": "off",
+    "max-classes-per-file": "off",
+    "consistent-return": "off",
+    "no-undef-init": "off",
+    "no-useless-escape": "off"
+  }
+
+}
