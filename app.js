@@ -3,14 +3,15 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const { errors } = require('celebrate');
+const { port, mongoAdress } = require('./utils/constants');
 const routes = require('./routes');
 const serverErrorHandler = require('./errors/serverErrorHandler');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 
-const { PORT = 3000 } = process.env;
+const { PORT = port, MONGO_ADRESS, NODE_ENV } = process.env;
 
 const app = express();
-mongoose.connect('mongodb://localhost:27017/bitfilmsdb', {
+mongoose.connect(NODE_ENV === 'production' ? MONGO_ADRESS : mongoAdress, {
   useNewUrlParser: true,
 });
 

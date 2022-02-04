@@ -2,6 +2,7 @@ const Movie = require('../models/Movies');
 const BadRequestError = require('../errors/bad-request-error');
 const ForbiddenError = require('../errors/forbidden-error');
 const errorMessages = require('../errors/messages');
+const NotFoundError = require('../errors/forbidden-error');
 
 const getMovies = (req, res, next) => {
   Movie.find({})
@@ -56,7 +57,7 @@ const deleteMovie = (req, res, next) => {
   Movie.findById(movieId)
     .then((movie) => {
       if (!movie) {
-        throw new BadRequestError(errorMessages.notFoundMovie);
+        throw new NotFoundError(errorMessages.notFoundMovie);
       }
       if (me.toString() !== movie.owner.toString()) {
         throw new ForbiddenError(errorMessages.notMyMovie);
@@ -69,7 +70,7 @@ const deleteMovie = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new BadRequestError(errorMessages.notFoundMovie));
+        next(new NotFoundError(errorMessages.notFoundMovie));
       } else {
         next(err);
       }

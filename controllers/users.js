@@ -1,12 +1,14 @@
 require('dotenv').config();
 
-const { JWT_SECRET } = process.env;
+const { NODE_ENV, JWT_SECRET } = process.env;
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/Users');
 const NotFoundError = require('../errors/not-found-error');
 const BadRequestError = require('../errors/bad-request-error');
 const errorMessages = require('../errors/messages');
+const ConflictError = require('../errors/conflict-error');
+const NotAuthError = require('../errors/not-auth-error');
 
 const getUsers = (req, res, next) => {
   User.find({})
@@ -45,50 +47,62 @@ const updateProfile = (req, res, next) => {
       }
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
         next(new BadRequestError(errorMessages.badRequestUser));
+      } else if (err.code === 11000) {
+        next(new ConflictError(errorMessages.duplicateUser));
       } else {
         next(err);
       }
-    });
+    })
+    .catch(next);
 };
 
 const signUp = (req, res, next) => {
-  const { email, password, name } = req.body;
-  const trimmedPassword = String(password).trim();
-  const trimmedEmail = String(email).trim();
-  if (trimmedPassword.length < 8) {
-    throw new BadRequestError(errorMessages.badPassword);
-  }
-  bcrypt
-    .hash(trimmedPassword, 10)
+  bcrypt.hash(req.body.password, 10)
     .then((hash) => User.create({
-      email: trimmedEmail,
+      email: req.body.email,
       password: hash,
-      name,
+      name: req.body.name,
     }))
     .then((user) => {
-      res.status(201).send({ data: { _id: user._id, email: user.email } });
+      res.send({
+        name: user.name,
+        _id: user._id,
+        email: user.email,
+      });
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new BadRequestError(errorMessages.badNewUser));
-      } else if (err.name === 'MongoError' && err.code === 11000) {
-        next(new BadRequestError(errorMessages.duplicateUser));
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        next(new BadRequestError(errorMessages.badRequestUser));
+      } else if (err.code === 11000) {
+        next(new ConflictError(errorMessages.duplicateUser));
       } else {
         next(err);
       }
-    });
+    })
+    .catch(next);
 };
 
 const signIn = (req, res, next) => {
   const { email, password } = req.body;
-  const trimmedPassword = String(password).trim();
-  const trimmedEmail = String(email).trim();
-  User.findUserByCredentials(trimmedEmail, trimmedPassword)
+
+  return User.findOne({ email }).select('+password')
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
-      res.send({ token });
+      bcrypt.compare(password, user.password)
+        .then((matched) => {
+          if (!matched) {
+            next(new NotAuthError(errorMessages.unauthorized));
+          } else {
+            const token = jwt.sign(
+              { _id: user._id },
+              NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
+              { expiresIn: '7d' },
+            );
+
+            res.status(200).send({ token });
+          }
+        });
     })
     .catch(next);
 };
