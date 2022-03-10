@@ -52,12 +52,13 @@ app.use((req, res, next) => {
 app.use(requestLogger);
 app.use(
   cors({
-    origin: '*',
+    option: allowedCors,
+    origin: allowedCors,
     credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     preflightContinue: false,
     optionsSuccessStatus: 204,
-  })
+  }),
 );
 app.use(helmet());
 app.use(express.json());
