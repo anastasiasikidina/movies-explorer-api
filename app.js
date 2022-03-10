@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const { errors } = require('celebrate');
-const { port, mongoAdress } = require('./utils/constants');
+const { port, mongoAdress, allowedCors } = require('./utils/constants');
 const routes = require('./routes');
 const serverErrorHandler = require('./errors/serverErrorHandler');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
@@ -14,10 +14,6 @@ const app = express();
 mongoose.connect(NODE_ENV === 'production' ? MONGO_ADRESS : mongoAdress, {
   useNewUrlParser: true,
 });
-// Массив доменов, с которых разрешены кросс-доменные запросы
-const allowedCors = [
-  'localhost:3000',
-];
 
 app.use((req, res, next) => {
   const { origin } = req.headers; // Сохраняем источник запроса в переменную origin
