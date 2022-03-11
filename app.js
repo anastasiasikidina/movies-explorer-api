@@ -58,7 +58,7 @@ app.use(
 );*/
 
 app.use(cors({
-  origin: '*',
+  origin: allowedCors,
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   preflightContinue: false,
   optionsSuccessStatus: 204,
