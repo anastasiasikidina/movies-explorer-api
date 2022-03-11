@@ -14,7 +14,7 @@ const app = express();
 mongoose.connect(NODE_ENV === 'production' ? MONGO_ADRESS : mongoAdress, {
   useNewUrlParser: true,
 });
-
+/*
 app.use((req, res, next) => {
   const { origin } = req.headers; // Сохраняем источник запроса в переменную origin
   // проверяем, что источник запроса есть среди разрешённых
@@ -55,7 +55,15 @@ app.use(
     preflightContinue: false,
     optionsSuccessStatus: 204,
   }),
-);
+);*/
+
+app.use(cors({
+  origin: '*',
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
+}));
+
 app.use(helmet());
 app.use(express.json());
 app.use(express.static(__dirname));
