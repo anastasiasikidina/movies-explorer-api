@@ -84,27 +84,36 @@ const signUp = (req, res, next) => {
     .catch(next);
 };
 
-const signIn = (req, res, next) => {
-  const { email, password } = req.body;
+const signIn = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
 
-  return User.findOne({ email }).select('+password')
-    .then((user) => {
-      bcrypt.compare(password, user.password)
-        .then((matched) => {
-          if (!matched) {
-            next(new NotAuthError(errorMessages.unauthorized));
-          } else {
-            const token = jwt.sign(
-              { _id: user._id },
-              NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
-              { expiresIn: '7d' },
-            );
+    const user = await User.findOne({ email }).select('+password');
+    if (!user) {
+      throw new NotAuthError('Неправильные email/password. Попробуйте еще раз.');
+    }
 
-            res.status(200).send({ token });
-          }
-        });
-    })
-    .catch(next);
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      throw new NotAuthError('Неправильные email/password. Попробуйте еще раз.');
+    }
+
+    const token = jwt.sign(
+      { _id: user._id },
+      NODE_ENV === 'production' ? JWT_SECRET : 'some-very-secret-code',
+      { expiresIn: '7d' },
+    );
+
+    return res.status(200).send({
+      token,
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      email: user.email,
+    });
+  } catch (err) {
+    next(err);
+  }
 };
 
 module.exports = {
