@@ -18,7 +18,7 @@ mongoose.connect(NODE_ENV === 'production' ? MONGO_ADRESS : mongoAdress, {
 app.use(requestLogger);
 
 app.use(cors({
-  origin: ['https://movies.practicum.nomoredomains.work', /\.movies.practicum.nomoredomains.work$/, 'http://movies.practicum.nomoredomains.work/'],
+  origin: ['https://movies-explorer.anastas.s.nomoredomains.work', /\.movies-explorer.anastas.s.nomoredomains.work$/, 'http://movies-explorer.anastas.s.nomoredomains.work/'],
   credentials: true,
 }));
 
