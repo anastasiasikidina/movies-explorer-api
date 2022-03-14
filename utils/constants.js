@@ -1,4 +1,13 @@
 const port = 3000;
 const mongoAdress = 'mongodb://localhost:27017/bitfilmsdb';
 
-module.exports = { mongoAdress, port };
+// Массив доменов, с которых разрешены кросс-доменные запросы
+const allowedCors = [
+  'localhost:3000',
+  'https://movies-explorer-api.nomoredomains.rocks',
+  'https://movies-explorer.anastas.s.nomoredomains.work',
+  'http://movies-explorer.anastas.s.nomoredomains.work',
+
+];
+
+module.exports = { mongoAdress, port, allowedCors };
