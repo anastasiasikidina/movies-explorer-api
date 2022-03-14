@@ -22,7 +22,7 @@ mongoose.connect(NODE_ENV === 'production' ? MONGO_URL : mongoAdress, {
 
 app.use(requestLogger);
 app.use(cors({
-  origin: '*',
+  origin:  ['https://movies-explorer-api.nomoredomains.rocks', /\.movies-explorer-api.nomoredomains.rocks$/, 'http://movies-explorer-api.nomoredomains.rocks/'],
   credentials: true,
 }));
 app.use(limiter);
