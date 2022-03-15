@@ -1,3 +1,4 @@
+/*
 const DEFAULT_ALLOWED_METHODS = 'GET,HEAD,PUT,PATCH,POST,DELETE';
 const ALLOWED_CORS = [
   'http://localhost:3000',
@@ -25,3 +26,4 @@ module.exports = (req, res, next) => {
 
   next();
 };
+*/
