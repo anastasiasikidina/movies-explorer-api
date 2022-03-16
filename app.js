@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const { errors } = require('celebrate');
-const { port, mongoAdress } = require('./utils/constants');
+const { port, mongoAdress, ALLOWED_CORS } = require('./utils/constants');
 const routes = require('./routes');
 const auth = require('./middlewares/auth');
 const serverErrorHandler = require('./errors/serverErrorHandler');
@@ -22,7 +22,7 @@ app.use(requestLogger);
 app.use(cors);
 */
 app.use(cors({
-  origin: '*',
+  origin: ALLOWED_CORS,
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   preflightContinue: false,
   optionsSuccessStatus: 204,
