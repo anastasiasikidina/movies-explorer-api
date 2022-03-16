@@ -5,7 +5,6 @@ const helmet = require('helmet');
 const { errors } = require('celebrate');
 const { port, mongoAdress, ALLOWED_CORS } = require('./utils/constants');
 const routes = require('./routes');
-const auth = require('./middlewares/auth');
 const serverErrorHandler = require('./errors/serverErrorHandler');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 // const cors = require('./middlewares/cors');
@@ -24,12 +23,8 @@ app.use(cors);
 app.use(cors({
   origin: ALLOWED_CORS,
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  preflightContinue: false,
-  optionsSuccessStatus: 204,
   credentials: true,
 }));
-
-app.use(auth);
 
 app.use(helmet());
 app.use(express.json());
