@@ -3,43 +3,11 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const { errors } = require('celebrate');
-// const { port, mongoAdress, ALLOWED_CORS } = require('./utils/constants');
-const { ALLOWED_CORS } = require('./utils/constants');
-
+const { port, mongoAdress, ALLOWED_CORS } = require('./utils/constants');
 const routes = require('./routes');
 const serverErrorHandler = require('./errors/serverErrorHandler');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
-// const cors = require('./middlewares/cors');
-const limiter = require('./middlewares/limiter');
 
-const { PORT, MONGO_URL } = process.env;
-
-const app = express();
-mongoose.connect(MONGO_URL, {
-  useNewUrlParser: true,
-  useCreateIndex: true,
-  useFindAndModify: false,
-});
-
-app.use(requestLogger);
-app.use(cors({
-  origin: ALLOWED_CORS,
-  credentials: true,
-}));
-app.use(limiter);
-app.use(helmet());
-app.use(express.json());
-app.use(express.static(__dirname));
-
-app.use(routes);
-
-app.use(errorLogger);
-app.use(errors());
-app.use(serverErrorHandler);
-
-app.listen(PORT, () => console.log(`App is listening on port ${PORT}`));
-
-/*
 const { PORT = port, MONGO_ADRESS, NODE_ENV } = process.env;
 
 const app = express();
@@ -68,4 +36,3 @@ app.use(serverErrorHandler);
 app.listen(PORT, () => {
   console.log(`App has been started on port: ${PORT}`);
 });
-*/
