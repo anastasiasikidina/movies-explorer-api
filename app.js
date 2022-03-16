@@ -4,6 +4,8 @@ const cors = require('cors');
 const helmet = require('helmet');
 const { errors } = require('celebrate');
 // const { port, mongoAdress, ALLOWED_CORS } = require('./utils/constants');
+const { ALLOWED_CORS } = require('./utils/constants');
+
 const routes = require('./routes');
 const serverErrorHandler = require('./errors/serverErrorHandler');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
@@ -21,7 +23,7 @@ mongoose.connect(MONGO_URL, {
 
 app.use(requestLogger);
 app.use(cors({
-  origin: '*',
+  origin: ALLOWED_CORS,
   credentials: true,
 }));
 app.use(limiter);
