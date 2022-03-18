@@ -1,79 +1,62 @@
 const Movie = require('../models/movie');
+
+const NotFoundError = require('../errors/not-found-error');
 const BadRequestError = require('../errors/bad-request-error');
 const ForbiddenError = require('../errors/forbidden-error');
-const errorMessages = require('../errors/messages');
 
 const getMovies = (req, res, next) => {
-  Movie.find({})
-    .then((movies) => res.status(200).send({ data: movies }))
+  const owner = req.user._id;
+
+  Movie.find({ owner })
+    .orFail(new NotFoundError('Передан несуществующий id пользователя.'))
+    .then((cards) => {
+      res.send(cards);
+    })
+    .catch((err) => {
+      next(err);
+    })
     .catch(next);
 };
 
 const createMovie = (req, res, next) => {
   const owner = req.user._id;
-  const {
-    country,
-    director,
-    duration,
-    year,
-    description,
-    image,
-    trailer,
-    thumbnail,
-    movieId,
-    nameRU,
-    nameEN,
-  } = req.body;
-  Movie.create({
-    country,
-    director,
-    duration,
-    year,
-    description,
-    image,
-    trailer,
-    thumbnail,
-    owner,
-    movieId,
-    nameRU,
-    nameEN,
-  })
-    .then((movie) => res.status(200).send({ data: movie }))
+
+  Movie.create({ owner, ...req.body })
+    .then((movie) => {
+      res.status(201).send({ data: movie });
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        console.log(err);
-        next(new BadRequestError(errorMessages.badRequestMovie));
-      } else {
-        next(err);
+        throw new BadRequestError('Переданы некорректные данные при создании фильма');
       }
-    });
+    })
+    .catch(next);
 };
 
 const deleteMovie = (req, res, next) => {
+  const owner = req.user._id;
   const { movieId } = req.params;
-  const me = req.user._id;
 
   Movie.findById(movieId)
     .then((movie) => {
       if (!movie) {
-        throw new BadRequestError(errorMessages.notFoundMovie);
+        throw new NotFoundError('Передан несуществующий _id фильма.');
       }
-      if (me.toString() !== movie.owner.toString()) {
-        throw new ForbiddenError(errorMessages.notMyMovie);
-      }
-      Movie.deleteOne({ _id: movie._id })
-        .then((deleteInfo) => {
-          res.status(200).send({ deleteInfo });
-        })
-        .catch(next);
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new BadRequestError(errorMessages.notFoundMovie));
+      if (movie.owner.toString() !== owner) {
+        throw new ForbiddenError('Нет доступа к удалению фильма.');
       } else {
-        next(err);
+        Movie.findByIdAndDelete(movieId)
+          .then((deletedMovie) => {
+            res.send({ data: deletedMovie });
+          })
+          .catch(next);
       }
-    });
+    })
+    .catch(next);
 };
 
-module.exports = { getMovies, createMovie, deleteMovie };
+module.exports = {
+  getMovies,
+  createMovie,
+  deleteMovie,
+};
