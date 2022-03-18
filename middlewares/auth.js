@@ -1,3 +1,4 @@
+/*
 require('dotenv').config();
 
 const { NODE_ENV, JWT_SECRET } = process.env;
@@ -25,34 +26,27 @@ const auth = (req, res, next) => {
 };
 
 module.exports = auth;
-
-/*
-
+*/
 const jwt = require('jsonwebtoken');
+
 const NotAuthError = require('../errors/not-auth-error');
 
+const { NODE_ENV, JWT_SECRET } = process.env;
+
 module.exports = (req, res, next) => {
-  try {
-    const { authorization } = req.headers;
-    if (!authorization || !authorization.startsWith('Bearer ')) {
-      throw new NotAuthError(`Неавторизованный запрос...auth: ${authorization} and startWith: ${authorization.startsWith('Bearer')}`);
-    }
+  const token = req.cookies.jwt;
 
-    const token = authorization.replace('Bearer ', '');
-
-    let payload = undefined;
-    const { NODE_ENV, JWT_SECRET } = process.env;
-    const secCode = NODE_ENV === 'production' ? JWT_SECRET : 'some-very-secret-code';
-    try {
-      payload = jwt.verify(token, secCode);
-    } catch (err) {
-      throw new NotAuthError('Невалидный токен доступа к ресурсу.');
-    }
-
-    req.user = payload;
-    next();
-  } catch (err) {
-    next(err);
+  if (!token) {
+    next(new NotAuthError('К этому ресурсу есть доступ только для авторизированных пользователей'));
   }
+
+  let payload;
+  try {
+    payload = jwt.verify(token, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret');
+  } catch (err) {
+    throw new NotAuthError('Необходима авторизация');
+  }
+  req.user = payload;
+
+  return next();
 };
-*/
