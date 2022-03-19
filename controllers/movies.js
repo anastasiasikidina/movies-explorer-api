@@ -9,7 +9,7 @@ const getMovies = (req, res, next) => {
   const owner = req.user._id;
 
   Movie.find({ owner })
-    .orFail(new NotFoundError('Передан несуществующий id пользователя.'))
+    .orFail(new NotFoundError('Фильмы не найдены'))
     .then((movies) => res.send({ data: movies }))
     .catch((err) => {
       next(err);

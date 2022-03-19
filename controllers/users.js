@@ -9,6 +9,7 @@ const BadRequestError = require('../errors/bad-request-error');
 const errorMessages = require('../errors/messages');
 const ConflictError = require('../errors/conflict-error');
 const NotAuthError = require('../errors/not-auth-error');
+const { JWT_SECRET_LOCAL } = require('../utils/constants');
 
 const getUsers = (req, res, next) => {
   User.find({})
@@ -100,7 +101,7 @@ const signIn = async (req, res, next) => {
 
     const token = jwt.sign(
       { _id: user._id },
-      NODE_ENV === 'production' ? JWT_SECRET : 'some-very-secret-code',
+      NODE_ENV === 'production' ? JWT_SECRET : JWT_SECRET_LOCAL,
       { expiresIn: '7d' },
     );
 
